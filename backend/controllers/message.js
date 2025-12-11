@@ -4,9 +4,12 @@ import { ApiError } from "../utility/apiError.js";
 import { Conversation } from "../models/conversation.js";
 import { Message } from "../models/message.js";
 import { User } from "../models/user.js";
+import { log } from "console";
 
 const sendMessage = asyncHandler(async (req, res) => {
   const senderId = req.user._id;
+
+  
   const { conversationId, receiverId, message } = req.body;
   if (!message || (!conversationId && !receiverId)) {
     throw new ApiError(
@@ -46,19 +49,45 @@ const sendMessage = asyncHandler(async (req, res) => {
   const newMessage = await Message.create(newMessageData);
   conversation.messages.push(newMessage._id);
   await conversation.save();
-
+  // socket.io to implement
   return res
     .status(201)
     .json(new ApiResponse(200, newMessage, "Message sent successfully"));
 });
-const getOtherUsers = asyncHandler(async (req, res) => {
-  const currentUserId = req.user._id;
-  const users = await User.find({
-    _id: { $ne: currentUserId },
-  }).select("-password -refreshToken");
 
-  return res
-    .status(201)
-    .json(new ApiResponse(200, users, "users fetched successfully"));
+
+
+
+// get the message based on a recieverId from the frontend
+const getMessage = asyncHandler(async (req, res) => {
+  const senderId = req.user._id;
+  console.log(req.user._id);
+  
+  const { receiverId } = req.query;
+
+  // 1. Validating
+  if (senderId &&!receiverId) {
+    throw new ApiError(400, "receiverId is required");
+  }
+
+  // 2. Find the conversation
+  const conversation = await Conversation.findOne({
+    participants: { $all: [senderId, receiverId] },
+  });
+
+  // 3.In case of no conversation
+  if (!conversation) {
+    return res.status(200).json(200, [], "No messages");
+  }
+
+  // 4. Fetch all messages for that conversation
+  const messages = await Message.find({ conversationId: conversation._id })
+    .populate("senderId", "fullName userName avatar")
+    .sort({ createdAt: 1 });
+    console.log(messages);
+    
+  // 5. Return the messages
+  return res.status(201).json(new ApiResponse(200,messages,"message fetched successfully"));
 });
-export { sendMessage, getOtherUsers };
+
+export { sendMessage,getMessage };

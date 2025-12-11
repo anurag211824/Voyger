@@ -140,9 +140,43 @@ const loginUser = asyncHandler(async (req, res) => {
       )
     );
 });
+const logoutUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $unset: {
+        refreshToken: 1, // this removes the field from document
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged Out"));
+});
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, req.user, "User fetched successfully"));
 });
-export { registerUser, loginUser, getCurrentUser };
+const getOtherUsers = asyncHandler(async (req, res) => {
+  const currentUserId = req.user._id;
+  const users = await User.find({
+    _id: { $ne: currentUserId },
+  }).select("-password -refreshToken");
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, users, "users fetched successfully"));
+});
+export { registerUser, loginUser,logoutUser, getCurrentUser,getOtherUsers };
