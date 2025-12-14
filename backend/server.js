@@ -7,7 +7,8 @@ import connectDb from "./db/index.js";
 import userRouter from "./routes/user.js"
 import messageRouter from "./routes/message.js"
 import { errorMiddleware } from "./middleware/error.js";
-const app = express();
+import {app,server} from "./socket/socket.js"
+
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,

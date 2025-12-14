@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import User from "./User";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import { logOutUser, otherUser } from "../../redux/slices/user";
 const MobileSideBar = ({ openMobileSideBar }) => {
+    const {user,  otherUsers }= useSelector((state)=>state.user)
   const theme = useSelector((state) => state.theme);
   const isDark = theme === "dark";
-
+  const dispatch = useDispatch()
+  useEffect(() => {
+      dispatch(otherUser());
+    }, [dispatch]);
+  
   // Theme-based UI colors
   const bgColor = isDark ? "#1D232A" : "#FFFFFF";
   const textColor = isDark ? "text-white" : "text-black";
@@ -66,11 +71,9 @@ const MobileSideBar = ({ openMobileSideBar }) => {
 
         {/* Friends list */}
         <div className="flex flex-col gap-3 overflow-y-auto mt-3 h-[500px] hide-scrollbar">
-          <User />
-          <User />
-          <User />
-          <User />
-          <User />
+         {otherUsers.map((user) => {
+            return <User key={user.id} user={user} />;
+          })}
         </div>
       </div>
 
@@ -78,13 +81,15 @@ const MobileSideBar = ({ openMobileSideBar }) => {
       <div className="flex items-center justify-between gap-2">
         <div className="avatar">
           <div className="w-10 rounded-full">
-            <img src="https://img.daisyui.com/images/profile/demo/batperson@192.webp" />
+            <img src={user?.avatar} />
           </div>
         </div>
 
-        <p className={textColor}>Username</p>
+        <p className={textColor}>{user?.userName}</p>
 
-        <button className={`btn btn-sm flex-1 ${logoutBtn}`}>
+        <button
+         onClick={()=>dispatch(logOutUser())}
+         className={`btn btn-sm flex-1 ${logoutBtn}`}>
           Logout
         </button>
       </div>

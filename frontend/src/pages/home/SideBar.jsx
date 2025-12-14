@@ -1,17 +1,28 @@
-import React from "react";
+import React, { useEffect } from "react";
 import User from "./User";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import { logOutUser } from "../../redux/slices/user";
+import { otherUser } from "../../redux/slices/user";
 const SideBar = () => {
-  const theme = useSelector((state) => state.theme); 
-
+  const dispatch = useDispatch();
+  const theme = useSelector((state) => state.theme);
+  const { user, otherUsers, getOtherUserloading } = useSelector(
+    (state) => state.user
+  );
   const isDark = theme === "dark";
+  console.log(otherUsers);
 
   const bgColor = isDark ? "#1D232A" : "#FFFFFF";
   const textColor = isDark ? "text-white" : "text-black";
   const borderColor = isDark ? "border-gray-600" : "border-gray-300";
   const inputBg = isDark ? "bg-[#2A323C] text-white" : "bg-gray-100 text-black";
-  const logoutBtn = isDark ? "bg-[#286AA1] text-white" : "bg-blue-500 text-white";
+  const logoutBtn = isDark
+    ? "bg-[#286AA1] text-white"
+    : "bg-blue-500 text-white";
+
+  useEffect(() => {
+    dispatch(otherUser());
+  }, [dispatch]);
 
   return (
     <div
@@ -59,26 +70,29 @@ const SideBar = () => {
         </label>
 
         {/* Friends & Chats */}
-        <div className="flex flex-col gap-3 overflow-y-auto mt-3 h-[500px] hide-scrollbar">
-          <User />
-          <User />
-          <User />
-          <User />
-          <User />
-        </div>
+        {getOtherUserloading === true ? (
+          <p>Loading users....</p>
+        ) : (
+          <div className="flex flex-col gap-3 overflow-y-auto mt-3 h-[500px] hide-scrollbar">
+            {otherUsers.map((user) => {
+              return <User key={user?._id} user={user} />;
+            })}
+          </div>
+        )}
       </div>
 
       {/* Bottom Section */}
       <div className="flex items-center justify-between gap-2 mt-2">
         <div className="avatar">
           <div className="w-10 rounded-full">
-            <img src="https://img.daisyui.com/images/profile/demo/batperson@192.webp" />
+            <img src={user?.avatar} />
           </div>
         </div>
 
-        <p className={textColor}>Username</p>
+        <p className={textColor}>{user?.userName}</p>
 
         <button
+          onClick={() => dispatch(logOutUser())}
           className={`btn btn-sm flex-1 ${logoutBtn}`}
         >
           Logout

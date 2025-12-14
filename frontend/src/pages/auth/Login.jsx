@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
+import { toast } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../../redux/slices/user";
 const Login = () => {
+  const dispatch = useDispatch();
+  const {loading} = useSelector((state)=>state.user)
   const [LoginData, setLoginData] = useState({
+    userName: "",
     email: "",
     password: "",
   });
@@ -12,7 +18,8 @@ const Login = () => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(LoginData);
+    dispatch(loginUser(LoginData))
+    toast.success("Login Successfull");
     setLoginData({
       email: "",
       password: "",
@@ -22,7 +29,7 @@ const Login = () => {
     <div className="min-h-screen flex flex-col items-center justify-center max-w-[500px] mx-auto ">
       <div className="flex flex-col items-center w-[80%] mb-4 ">
         <img
-          src="public/ChatGPT Image Nov 26, 2025, 09_45_44 AM.png"
+          src="/ChatGPT Image Nov 26, 2025, 09_45_44 AM.png"
           alt=""
           width="75"
           height="75"
@@ -37,6 +44,36 @@ const Login = () => {
         onSubmit={handleSubmit}
         className="w-[80%] mx-auto flex flex-col gap-4 p-4 rounded-md border shadow-md border-gray-600"
       >
+        {/* userName */}
+        <label className="input flex items-center gap-2 w-full focus-within:ring-0">
+         <svg
+            className="h-5 opacity-50"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+          >
+            <g
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              strokeWidth="2"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </g>
+          </svg>
+
+          <input
+            type="text"
+            name="userName"
+            placeholder="username"
+            value={LoginData.userName}
+            required
+            onChange={handleInputChange}
+            className="outline-none focus:outline-none focus:ring-0 focus:border-transparent"
+          />
+        </label>
+
         {/* Email */}
         <label className="input flex items-center gap-2 w-full focus-within:ring-0">
           <svg
@@ -96,12 +133,25 @@ const Login = () => {
           />
         </label>
 
-        <button type="submit" className="btn  bg-blue-500 text-medium">
-          Login
+        <button
+          className="btn bg-blue-500 text-medium"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <span className="loading loading-spinner text-black"></span>
+              <span className="text-black"> Logging In...</span>
+            </>
+          ) : (
+            "Login"
+          )}
         </button>
       </form>
       <p className="mt-3 text-md font-light text-gray-200">
-        Do not have an account ? <Link to="/signup">Go to signup</Link>
+        Do not have an account ?{" "}
+        <Link className="underline text-blue-500" to="/signup">
+          Go to signup
+        </Link>
       </p>
     </div>
   );

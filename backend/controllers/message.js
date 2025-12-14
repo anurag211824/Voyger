@@ -4,13 +4,13 @@ import { ApiError } from "../utility/apiError.js";
 import { Conversation } from "../models/conversation.js";
 import { Message } from "../models/message.js";
 import { User } from "../models/user.js";
-import { log } from "console";
 
 const sendMessage = asyncHandler(async (req, res) => {
   const senderId = req.user._id;
 
-  
   const { conversationId, receiverId, message } = req.body;
+  console.log(req.body);
+
   if (!message || (!conversationId && !receiverId)) {
     throw new ApiError(
       400,
@@ -47,6 +47,7 @@ const sendMessage = asyncHandler(async (req, res) => {
   };
 
   const newMessage = await Message.create(newMessageData);
+  newMessage.populate("senderId", "fullName userName avatar");
   conversation.messages.push(newMessage._id);
   await conversation.save();
   // socket.io to implement
@@ -55,18 +56,14 @@ const sendMessage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, newMessage, "Message sent successfully"));
 });
 
-
-
-
 // get the message based on a recieverId from the frontend
 const getMessage = asyncHandler(async (req, res) => {
   const senderId = req.user._id;
-  console.log(req.user._id);
-  
+
   const { receiverId } = req.query;
 
   // 1. Validating
-  if (senderId &&!receiverId) {
+  if (senderId && !receiverId) {
     throw new ApiError(400, "receiverId is required");
   }
 
@@ -84,10 +81,10 @@ const getMessage = asyncHandler(async (req, res) => {
   const messages = await Message.find({ conversationId: conversation._id })
     .populate("senderId", "fullName userName avatar")
     .sort({ createdAt: 1 });
-    console.log(messages);
-    
   // 5. Return the messages
-  return res.status(201).json(new ApiResponse(200,messages,"message fetched successfully"));
+  return res
+    .status(201)
+    .json(new ApiResponse(200, messages, "message fetched successfully"));
 });
 
-export { sendMessage,getMessage };
+export { sendMessage, getMessage };
