@@ -12,7 +12,7 @@ const Home = () => {
   return (
    <div className="min-h-screen flex flex-row">
     <SideBar/>
-    <MobileSideBar openMobileSideBar={openMobileSideBar}/>
+    <MobileSideBar setOpenMObileSideBar={setOpenMobileSideBar} openMobileSideBar={openMobileSideBar}/>
     <MessageContainer setOpenMObileSideBar={setOpenMobileSideBar}/>
    </div>
   );

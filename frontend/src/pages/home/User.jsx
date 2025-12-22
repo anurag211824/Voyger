@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentChatUser } from "../../redux/slices/user";
 
-const User = ({ user }) => {
+const User = ({ user , setOpenMObileSideBar}) => {
   const { currentChatUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
@@ -11,9 +11,10 @@ const User = ({ user }) => {
 
   return (
     <div
-      onClick={() =>
-        dispatch(setCurrentChatUser({ currentChattingUser: user }))
-      }
+      onClick={() => {
+        dispatch(setCurrentChatUser({ currentChattingUser: user }));
+        setOpenMObileSideBar(prev=>!prev);
+      }}
       className={`avatar flex-row gap-2 w-full items-center p-2 cursor-pointer
         ${isActive && `bg-gray-200 rounded-md text-black`}
       `}

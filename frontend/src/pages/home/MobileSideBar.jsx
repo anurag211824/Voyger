@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import User from "./User";
 import { useDispatch, useSelector } from "react-redux";
 import { logOutUser, otherUser } from "../../redux/slices/user";
-const MobileSideBar = ({ openMobileSideBar }) => {
+const MobileSideBar = ({ setOpenMObileSideBar, openMobileSideBar }) => {
     const {user,  otherUsers }= useSelector((state)=>state.user)
   const theme = useSelector((state) => state.theme);
   const isDark = theme === "dark";
@@ -72,7 +72,7 @@ const MobileSideBar = ({ openMobileSideBar }) => {
         {/* Friends list */}
         <div className="flex flex-col gap-3 overflow-y-auto mt-3 h-[500px] hide-scrollbar">
          {otherUsers.map((user) => {
-            return <User key={user.id} user={user} />;
+            return <User setOpenMObileSideBar={setOpenMObileSideBar} key={user.id} user={user} />;
           })}
         </div>
       </div>

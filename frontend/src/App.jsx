@@ -7,13 +7,16 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadUser } from "./redux/slices/user";
 function App() {
+  console.log(localStorage.getItem("isAuthenticated"));
+  
   const { isAuthenticated,currentChatUser} = useSelector((state) => state.user);
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(loadUser());
+    if((localStorage.getItem("isAuthenticated") !== true)){
+       dispatch(loadUser());
+       localStorage.setItem("isAuthenticated",true)
+    }
   }, [dispatch,isAuthenticated,currentChatUser]);
-
-
 
   const router = createBrowserRouter([
     {
@@ -22,12 +25,10 @@ function App() {
     },
     {
       path: "/login",
-      // 3. Public Route: Only show Login if NOT authenticated
       element: isAuthenticated ? <Navigate to="/" /> : <Login />,
     },
     {
       path: "/signup",
-      // 4. Public Route: Only show SignUp if NOT authenticated
       element: isAuthenticated ? <Navigate to="/" /> : <SignUp />,
     },
   ]);
