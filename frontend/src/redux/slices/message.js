@@ -40,7 +40,6 @@ const messageSlice = createSlice({
       state.messages.push(action.payload);
     },
     addMessage: (state, action) => {
-      // Add incoming message to the messages array
       state.messages.push(action.payload);
     },
   },

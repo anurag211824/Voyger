@@ -4,66 +4,93 @@ import Message from "./Message";
 import { MdNightlight, MdLightMode } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "../../redux/slices/theme";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import CurrentChatUser from "./CurrentChatUser";
-import { getMessage, sendMessage } from "../../redux/slices/message";
-import toast from "react-hot-toast";
-
+import { addSocketMessage, getMessage, sendMessage } from "../../redux/slices/message";
+import { SocketContext } from "../../socket/SocketContext";
+import { useContext } from "react";
 const MessageContainer = ({ setOpenMObileSideBar }) => {
-
+  const { sendSocketMessage, onReceiveMessage, offReceiveMessage } = useContext(SocketContext);
   const theme = useSelector((state) => state.theme);
-  const { currentChatUser } = useSelector((state) => state.user);
+  const { currentChatUser, user } = useSelector((state) => state.user);
   const { messages, loading } = useSelector((state) => state.message);
   const [message, setMessage] = useState("");
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const handleInputChange = (e) => {
     const { value } = e.target;
     setMessage(value);
   };
+  
+  // Auto-scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
   const dispatch = useDispatch();
   const handleSendMessage = async (e) => {
     e.preventDefault();
 
-    if (!message.trim()) {
-      toast.error("Please enter a message");
-      return;
-    }
+    if (!message.trim() || !currentChatUser?._id) return;
 
-    if (!currentChatUser?._id) {
-      toast.error("No user selected");
-      return;
-    }
+    const payload = {
+      receiverId: currentChatUser._id,
+      message: message.trim(),
+    };
 
-    try {
-      console.log("Sending message:", {
-        receiverId: currentChatUser._id,
-        message: message.trim(),
-      });
+    // 1️⃣ Save in DB
+    dispatch(sendMessage(payload));
 
-      dispatch(
-        sendMessage({
-          receiverId: currentChatUser._id,
-          message: message.trim(),
-        })
-      );
+    // 2️⃣ Send real-time with complete sender info
+    sendSocketMessage({
+      senderId: user._id,
+      receiverId: currentChatUser._id,
+      message: message.trim(),
+      createdAt: new Date().toISOString(),
+      // Add sender info for immediate display
+      senderInfo: {
+        _id: user._id,
+        userName: user.userName,
+        avatar: user.avatar
+      }
+    });
 
-      setMessage("");
-      toast.success("Message sent!");
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      toast.error("Failed to send message");
-    }
+    setMessage("");
   };
-  useEffect(()=>{
-     const html = document.querySelector("html");
+
+  useEffect(() => {
+    const html = document.querySelector("html");
     html.setAttribute("data-theme", theme);
-  },[theme])
+  }, [theme]);
   useEffect(() => {
     if (currentChatUser?._id) {
       dispatch(getMessage(currentChatUser._id));
     }
   }, [currentChatUser, dispatch]);
+  
+  // Auto-scroll when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+  // Set up socket listener once when component mounts
+  useEffect(() => {
+    const handleReceiveMessage = (newMessage) => {
+      console.log("Received message via socket:", newMessage);
+      // Only add message if it's related to current chat
+      if (
+        (newMessage.senderId === currentChatUser?._id && newMessage.receiverId === user?._id) ||
+        (newMessage.senderId === user?._id && newMessage.receiverId === currentChatUser?._id)
+      ) {
+        dispatch(addSocketMessage(newMessage));
+      }
+    };
 
+    onReceiveMessage(handleReceiveMessage);
 
+    return () => {
+      offReceiveMessage();
+    };
+  }, [currentChatUser?._id, user?._id, dispatch, onReceiveMessage, offReceiveMessage]);
   return (
     <div className="h-screen flex flex-col w-full p-2">
       {/* ================= Header ================= */}
@@ -115,7 +142,10 @@ const MessageContainer = ({ setOpenMObileSideBar }) => {
       ) : (
         <>
           {/* ================= Messages ================= */}
-          <div className="flex-1 p-2 overflow-y-auto hide-scrollbar">
+          <div 
+            ref={messagesContainerRef}
+            className="flex-1 p-2 overflow-y-auto hide-scrollbar"
+          >
             {messages.length === 0 ? (
               <p className="text-center text-gray-500 mt-4">No messages yet</p>
             ) : (
@@ -128,13 +158,15 @@ const MessageContainer = ({ setOpenMObileSideBar }) => {
                     new Date(message.createdAt).toDateString();
                 return (
                   <Message
-                    key={message._id}
+                    key={message._id || `${message.senderId}-${index}`}
                     message={message}
                     showDate={showDate}
                   />
                 );
               })
             )}
+            {/* Scroll anchor */}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* ================= Input Box ================= */}

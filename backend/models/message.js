@@ -13,14 +13,10 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-
-    // Text message
     message: {
       type: String,
       default: "",
     },
-
-    // Media attachments
     attachments: [
       {
         url: { type: String },

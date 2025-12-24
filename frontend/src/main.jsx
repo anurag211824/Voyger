@@ -4,12 +4,13 @@ import "./index.css";
 import App from "./App.jsx";
 import store from "../src/redux/store.js";
 import { Provider } from "react-redux";
+import SocketProvider from "./socket/SocketProvider.jsx";
 
 
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
-    
-      <App />
+    <SocketProvider><App /></SocketProvider>
+      
   
   </Provider>
 );
