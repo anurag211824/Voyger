@@ -3,7 +3,6 @@ import { ApiResponse } from "../utility/apiResponse.js";
 import { ApiError } from "../utility/apiError.js";
 import { Conversation } from "../models/conversation.js";
 import { Message } from "../models/message.js";
-import { User } from "../models/user.js";
 
 const sendMessage = asyncHandler(async (req, res) => {
   const senderId = req.user._id;

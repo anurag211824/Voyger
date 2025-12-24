@@ -10,7 +10,6 @@ export const getMessage = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await API.get(`/message/chat-message?receiverId=${id}`);
-      console.log(response.data.data);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -36,7 +35,15 @@ export const sendMessage = createAsyncThunk(
 const messageSlice = createSlice({
   name: "message",
   initialState,
-  reducers: {},
+  reducers: {
+    addSocketMessage: (state, action) => {
+      state.messages.push(action.payload);
+    },
+    addMessage: (state, action) => {
+      // Add incoming message to the messages array
+      state.messages.push(action.payload);
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getMessage.pending, (state) => {
@@ -68,5 +75,5 @@ const messageSlice = createSlice({
       });
   },
 });
-
+export const { addSocketMessage, addMessage } = messageSlice.actions;
 export default messageSlice.reducer;

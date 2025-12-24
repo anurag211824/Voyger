@@ -10,6 +10,7 @@ import { getMessage, sendMessage } from "../../redux/slices/message";
 import toast from "react-hot-toast";
 
 const MessageContainer = ({ setOpenMObileSideBar }) => {
+
   const theme = useSelector((state) => state.theme);
   const { currentChatUser } = useSelector((state) => state.user);
   const { messages, loading } = useSelector((state) => state.message);
@@ -52,15 +53,16 @@ const MessageContainer = ({ setOpenMObileSideBar }) => {
       toast.error("Failed to send message");
     }
   };
-
-  useEffect(() => {
-
-    const html = document.querySelector("html");
+  useEffect(()=>{
+     const html = document.querySelector("html");
     html.setAttribute("data-theme", theme);
+  },[theme])
+  useEffect(() => {
     if (currentChatUser?._id) {
       dispatch(getMessage(currentChatUser._id));
     }
-  }, [theme, currentChatUser, dispatch]);
+  }, [currentChatUser, dispatch]);
+
 
   return (
     <div className="h-screen flex flex-col w-full p-2">

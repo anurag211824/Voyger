@@ -7,15 +7,11 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadUser } from "./redux/slices/user";
 function App() {
-  console.log(localStorage.getItem("isAuthenticated"));
   
   const { isAuthenticated,currentChatUser} = useSelector((state) => state.user);
   const dispatch = useDispatch();
   useEffect(() => {
-    if((localStorage.getItem("isAuthenticated") !== true)){
-       dispatch(loadUser());
-       localStorage.setItem("isAuthenticated",true)
-    }
+    dispatch(loadUser());
   }, [dispatch,isAuthenticated,currentChatUser]);
 
   const router = createBrowserRouter([

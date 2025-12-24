@@ -40,7 +40,6 @@ export const otherUser = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const response = await API.get("/users/other-users", formData);
-      console.log(response.data.data);
 
       return response.data.data;
     } catch (error) {

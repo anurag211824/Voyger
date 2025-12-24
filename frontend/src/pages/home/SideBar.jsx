@@ -10,7 +10,6 @@ const SideBar = () => {
     (state) => state.user
   );
   const isDark = theme === "dark";
-  console.log(otherUsers);
 
   const bgColor = isDark ? "#1D232A" : "#FFFFFF";
   const textColor = isDark ? "text-white" : "text-black";

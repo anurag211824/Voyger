@@ -18,7 +18,6 @@ const formatTime = (date) => {
 
 const Message = ({ message, showDate }) => {
   const { user } = useSelector((state) => state.user);
-   console.log(message)
   const isOwnMessage = message?.senderId?._id === user?._id;
   
   return (

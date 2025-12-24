@@ -72,7 +72,7 @@ const MobileSideBar = ({ setOpenMObileSideBar, openMobileSideBar }) => {
         {/* Friends list */}
         <div className="flex flex-col gap-3 overflow-y-auto mt-3 h-[500px] hide-scrollbar">
          {otherUsers.map((user) => {
-            return <User setOpenMObileSideBar={setOpenMObileSideBar} key={user.id} user={user} />;
+            return <User  key={user._id}  setOpenMObileSideBar={setOpenMObileSideBar} user={user} />;
           })}
         </div>
       </div>

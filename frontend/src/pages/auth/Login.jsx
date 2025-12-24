@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../redux/slices/user";
 const Login = () => {
   const dispatch = useDispatch();
-  const {loading} = useSelector((state)=>state.user)
+  const {loading,isAuthenticated} = useSelector((state)=>state.user)
   const [LoginData, setLoginData] = useState({
     userName: "",
     email: "",
@@ -137,7 +137,7 @@ const Login = () => {
           className="btn bg-blue-500 text-medium"
           disabled={loading}
         >
-          {loading ? (
+          {isAuthenticated && loading ? (
             <>
               <span className="loading loading-spinner text-black"></span>
               <span className="text-black"> Logging In...</span>
